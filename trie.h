@@ -4,7 +4,7 @@
 struct trieNode_ {
 	char data;
 	int count;
-	unsigned char isWord;
+	int isWord;
 	int level;
 	struct trieNode_* next[26];
 
@@ -12,12 +12,15 @@ struct trieNode_ {
 
 typedef struct trieNode_ trieNode;
 
-void add(trieNode* toadd,trieNode* root);
+int gWordCount;
+trieNode* root;
+int add(char toadd,trieNode* parent);
 void insert(trieNode* toinsert,trieNode* root);
 void deleteOne(trieNode* todelete,trieNode* root);
-void deleteTree(trieNode* root);
-trieNode* buildNode(char data,unsigned char isWord,int level);
-trieNode* buildTree(char* input);
+void deleteTrie(trieNode* root);
+trieNode* buildNode(char data,int isWord,int level);
+int buildTrie(char* input);
 void printTrie(trieNode* root);
+int traverseTrie(trieNode* root);
 
 #endif
