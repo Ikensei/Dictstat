@@ -20,6 +20,8 @@ int add(char toadd,trieNode* parent){
 		parent->next[index]->count++;
 	}
 
+	parent->next[index]->parent = parent;
+
 	return index;
 }
 

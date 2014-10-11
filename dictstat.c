@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stlib.h>
+#include <string.h>
 #include "dictstat.h"
 #include "trie.h"
 
@@ -62,20 +63,50 @@ void scanData(FILE* data_file){
 	char buffer[101];
 	char** wordarr;
 	int** countarr;
+	trieNode* temp = NULL;
+	int wordarrIndex;
 	int i;
-
+	
 	i = 0;
+	wordarrIndex = 0;
+	temp = root;
 	wordarr = malloc(gWordCount*sizeof(char*));
-	countarr = malloc(3*sizeof(int*));
 
-	for(i = 0;i < gWordCount;i++){
-
+	for(i = 0; i < gWordCount; i++){
+		countarr[i] = malloc(3*sizeof(int*));
 	}
 
-
-
-
-
-
-
+	trieDFS(temp,buffer,wordarr,&wordarrIndex);
 }
+
+int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
+	int i;
+
+	int i = 0;
+
+	if(scout->level > -1){
+		buffer[scout->level] = scout->data;
+	}
+
+	if(scout->isWord > -1){
+		buffer[(scout->level)+1] = '\0';
+
+		wordarr[*index] = (char*)malloc((scout->level+1)*sizeof(char));
+
+		memcpy(wordarr[*index],buffer,(scout->level)+1);
+
+		scout->isWord = *index;
+
+		(*index)++;
+
+		memset(buffer + (scout->level + 1),0,1);
+	}
+
+	for(i = 0; i < 26; i++){
+		if(scout->next != NULL){
+			trieDFS(scout->next[i],buffer,wordarr,index);
+		}
+	}
+
+	return 0;		
+} 

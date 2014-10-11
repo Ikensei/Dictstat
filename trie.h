@@ -7,6 +7,7 @@ struct trieNode_ {
 	int isWord;
 	int level;
 	struct trieNode_* next[26];
+	struct trieNode_* parent;
 
 };
 
