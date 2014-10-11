@@ -82,5 +82,5 @@ void printTrie(trieNode* root){
 }
 
 int traverseTrie(trieNode* root){
-
+	return 0;
 }

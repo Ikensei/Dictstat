@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <stlib.h>
+#include <stdlib.h>
 #include <string.h>
-#include "dictstat.h"
 #include "trie.h"
+#include "dictstat.h"
+
 
 int main(int argc,char** argv){
 	FILE* dictpoint = NULL;
@@ -10,20 +11,21 @@ int main(int argc,char** argv){
 	root = NULL;
 
 	if(argc < 3){
-		fprintf("stderr", "invalid input\n");
+		fprintf(stderr, "invalid input\n");
 		return 1;
 	}
 
 	dictpoint = fopen(argv[1],"r");
 	statpoint = fopen(argv[2],"r");
 	if(dictpoint == NULL || statpoint == NULL){
-		fprintf("stderr", "invalid input\n");
+		fprintf(stderr, "invalid input\n");
 		return 1;
 	}
 
-	readDict(dictpoint)
+	readDict(dictpoint);
+/*if dict is invalid return*/	
 	if(readval == 1){
-		return;
+		return 1;
 	}
 	else{
 	scanData(statpoint);
@@ -41,7 +43,7 @@ void readDict(FILE* dict_file){
 	int i = 0;
 
 	if(fsize == 0){
-		fprintf("stderr", "empty dictionary\n");
+		fprintf(stderr, "empty dictionary\n");
 		fclose(dict_file);
 		readval = 1;
 		return;
@@ -53,7 +55,7 @@ void readDict(FILE* dict_file){
 	}
 	
 	fclose(dict_file);
-	root =  buildTrie(fileBuffer);
+	buildTrie(fileBuffer);
 
 	readval = 0;
 	return;
@@ -117,7 +119,7 @@ void scanData(FILE* data_file){
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 	int i;
 
-	int i = 0;
+	i = 0;
 
 	if(scout->level > -1){
 		buffer[scout->level] = scout->data;
@@ -146,10 +148,10 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 	return 0;		
 }
 
-int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
+void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 /*return on reaching the end of file*/	
 	if(fileBuffer[*index] == EOF){
-		return 0;
+		return;
 	}
 
 /*only happens on characters not in a-z*/
@@ -159,12 +161,14 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 			fileBuffer[*index] = (char)((int)fileBuffer[*index] + 32);
 		}
 		else{
-			counter(fileBuffer,root,countarr,*index++);
+			(*index)++;
+			counter(fileBuffer,root,countarr,index);
 		}
 	}	
 
 	if(scout->next[((int)fileBuffer[*index]) - (int)'a'] == NULL){
-		counter(fileBuffer,root,countarr,*index++);
+		(*index)++;
+		counter(fileBuffer,root,countarr,index);
 	}
 	else{
 		scout = scout->next[((int)fileBuffer[*index]) - (int)'a'];
@@ -203,11 +207,12 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 			prefixBot(scout,countarr);
 		}	
 	}
-
-	counter(fileBuffer,scout,countarr,*index++);
+	
+	(*index)++;
+	counter(fileBuffer,scout,countarr,index);
 } 
 
-int prefixBot(trieNode* parent,int** countarr){
+void prefixBot(trieNode* parent,int** countarr){
 	int i;
 	
 	i = 0;
