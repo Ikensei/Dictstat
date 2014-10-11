@@ -63,20 +63,27 @@ void scanData(FILE* data_file){
 	char buffer[101];
 	char** wordarr;
 	int** countarr;
-	trieNode* temp = NULL;
+	trieNode* wordtemp = NULL;
+	trieNode* counttemp = NULL;
 	int wordarrIndex;
+	int countarrIndex;
 	int i;
 	
 	i = 0;
 	wordarrIndex = 0;
-	temp = root;
+	wordtemp = root;
+	counttemp = root;
 	wordarr = malloc(gWordCount*sizeof(char*));
+	countarr = calloc(gWordCount,sizeof(int*));
 
 	for(i = 0; i < gWordCount; i++){
-		countarr[i] = malloc(3*sizeof(int*));
+		countarr[i] = malloc(3*sizeof(int));
 	}
 
-	trieDFS(temp,buffer,wordarr,&wordarrIndex);
+	trieDFS(wordtemp,buffer,wordarr,&wordarrIndex);
+
+	/*prepare for counting instances*/
+	counter(data_file,counttemp,countarr,&countarrIndex);
 }
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
@@ -109,4 +116,24 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 	}
 
 	return 0;		
+}
+
+int counter(FILE* data_file,trieNode* scout,int** countarr,int* index){
+	int fsize = fseek(data_file,0,SEEK_END) - fseek(data_file,0,SEEK_SET);
+	char* fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
+
+	char c = '0';
+	int j = 0;
+
+	if(fsize == 0){
+
+	}
+
+	while((c = fgetc(data_file)) != EOF){
+		fileBuffer[i] = c;
+		i++;
+	}
+	
+	fclose(data_file);
+
 } 
