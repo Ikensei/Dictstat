@@ -69,21 +69,41 @@ void scanData(FILE* data_file){
 	int countarrIndex;
 	int i;
 	
+/*declare vars for dumping data file into array*/
+	int fsize;
+	char* fileBuffer;
+	int j;
+	char c;
+	
 	i = 0;
 	wordarrIndex = 0;
 	wordtemp = root;
 	counttemp = root;
 	wordarr = malloc(gWordCount*sizeof(char*));
+	
 	countarr = calloc(gWordCount,sizeof(int*));
-
 	for(i = 0; i < gWordCount; i++){
-		countarr[i] = malloc(3*sizeof(int));
+		countarr[i] = (int*)calloc(3, sizeof(int));
 	}
+	
+/*initialize vars for dumping data file into array*/
+	fsize = fseek(data_file,0,SEEK_END) - fseek(data_file,0,SEEK_SET);
+	fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
+	j = 0;
+	c = '0';
 
 	trieDFS(wordtemp,buffer,wordarr,&wordarrIndex);
 
-	/*prepare for counting instances*/
-	counter(data_file,counttemp,countarr,&countarrIndex);
+/*prepare for counting instances*/
+	while((c = fgetc(data_file)) != EOF){
+		fileBuffer[j] = c;
+		j++;
+	}
+	
+	fclose(data_file);
+	
+	/*start getting counts*/
+	counter(fileBuffer,counttemp,countarr,&countarrIndex);
 }
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
@@ -118,22 +138,52 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 	return 0;		
 }
 
-int counter(FILE* data_file,trieNode* scout,int** countarr,int* index){
-	int fsize = fseek(data_file,0,SEEK_END) - fseek(data_file,0,SEEK_SET);
-	char* fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
-
-	char c = '0';
-	int j = 0;
-
-	if(fsize == 0){
-
+int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
+/*return on reaching the end of file*/	
+	if(fileBuffer[*index] == EOF){
+		return 0;
 	}
 
-	while((c = fgetc(data_file)) != EOF){
-		fileBuffer[i] = c;
-		i++;
+/*only happens on characters not in a-z*/
+	if((int)fileBuffer[*index] > 122 || (int)fileBuffer[*index] < 97){
+	/*for characters from A-Z*/
+		if((int)fileBuffer[*index] >= 65 && (int)fileBuffer[*index] <= 90){
+			fileBuffer[*index] = (char)((int)fileBuffer[*index] + 32);
+		}
+		else{
+			counter(fileBuffer,root,countarr,index++);
+		}
+	}	
+
+	if(scout->next[((int)fileBuffer[*index]) - (int)'a'] == NULL){
+		counter(fileBuffer,root,countarr,index++);
+	}
+	else{
+		scout = scout->next[((int)fileBuffer[*index]) - (int)'a'];
 	}
 	
-	fclose(data_file);
+	if(fileBuffer[*index+1] != EOF){
+	
+		if((int)fileBuffer[*index+1] >= 65 && (int)fileBuffer[*index+1] <= 90){
+			fileBuffer[*index+1] = (char)((int)fileBuffer[*index+1] + 32);
+		}
+	/*superword*/
+		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
+		
+		}
+	/*occurrence*/
+		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		
+		}
+	/*prefix*/
+		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		
+		}
+	}
+	
+	else{
+		
+	}
 
+	counter(fileBuffer,scout,countarr,index++);
 } 
