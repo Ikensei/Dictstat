@@ -68,6 +68,7 @@ void scanData(FILE* data_file){
 	int wordarrIndex;
 	int countarrIndex;
 	int i;
+	int x;
 	
 /*declare vars for dumping data file into array*/
 	int fsize;
@@ -76,6 +77,7 @@ void scanData(FILE* data_file){
 	char c;
 	
 	i = 0;
+	x = 0;
 	wordarrIndex = 0;
 	wordtemp = root;
 	counttemp = root;
@@ -102,8 +104,14 @@ void scanData(FILE* data_file){
 	
 	fclose(data_file);
 	
-	/*start getting counts*/
+/*start getting counts*/
 	counter(fileBuffer,counttemp,countarr,&countarrIndex);
+	
+/*print and done :D*/
+	
+	for(x = 0; x < gWordCount; x++){
+		printf("%s %d %d %d\n", wordarr[i],countarr[i][0],countarr[i][1],countarr[i][2]);
+	}
 }
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
