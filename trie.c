@@ -14,7 +14,7 @@ int add(char toadd,trieNode* parent){
 	}
 
 	if(parent->next[index] == NULL){
-		parent->next[index] = buildNode((char)((int)toadd + 97),1,(parent->level)+1);
+		parent->next[index] = buildNode((char)(index + 97),-1,(parent->level)+1);
 	}
 	else{
 		parent->next[index]->count++;
