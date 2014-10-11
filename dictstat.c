@@ -177,7 +177,7 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 		}
 	/*prefix*/
 		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
-			prefixBot(scout);
+			prefixBot(scout,countarr);
 		}
 	}
 	
@@ -192,14 +192,14 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 		}
 	/*prefix*/
 		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
-			prefixBot(scout);
+			prefixBot(scout,countarr);
 		}	
 	}
 
 	counter(fileBuffer,scout,countarr,*index++);
 } 
 
-int prefixBot(trieNode* parent){
+int prefixBot(trieNode* parent,int** countarr){
 	int i;
 	
 	i = 0;
@@ -210,7 +210,7 @@ int prefixBot(trieNode* parent){
 	
 	for(i = 0; i < 26; i++){
 		if(parent->next != NULL){
-			trieDFS(parent->next[i]);
+			prefixBot(parent->next[i],countarr);
 		}
 	}
 }
