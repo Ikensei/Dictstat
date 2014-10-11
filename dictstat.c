@@ -151,12 +151,12 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 			fileBuffer[*index] = (char)((int)fileBuffer[*index] + 32);
 		}
 		else{
-			counter(fileBuffer,root,countarr,index++);
+			counter(fileBuffer,root,countarr,*index++);
 		}
 	}	
 
 	if(scout->next[((int)fileBuffer[*index]) - (int)'a'] == NULL){
-		counter(fileBuffer,root,countarr,index++);
+		counter(fileBuffer,root,countarr,*index++);
 	}
 	else{
 		scout = scout->next[((int)fileBuffer[*index]) - (int)'a'];
@@ -169,21 +169,48 @@ int counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 		}
 	/*superword*/
 		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
-		
+			countarr[scout->isWord][2]++;
 		}
 	/*occurrence*/
 		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
-		
+			countarr[scout->isWord][0]++;
 		}
 	/*prefix*/
 		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
-		
+			prefixBot(scout);
 		}
 	}
 	
 	else{
-		
+	/*superword*/
+		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
+			countarr[scout->isWord][2]++;
+		}
+	/*occurrence*/
+		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+			countarr[scout->isWord][0]++;
+		}
+	/*prefix*/
+		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+			prefixBot(scout);
+		}	
 	}
 
-	counter(fileBuffer,scout,countarr,index++);
+	counter(fileBuffer,scout,countarr,*index++);
 } 
+
+int prefixBot(trieNode* parent){
+	int i;
+	
+	i = 0;
+	
+	if(parent->isWord > -1){
+		countarr[parent->isWord][1]++;
+	}
+	
+	for(i = 0; i < 26; i++){
+		if(parent->next != NULL){
+			trieDFS(parent->next[i]);
+		}
+	}
+}
