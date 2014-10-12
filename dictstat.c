@@ -22,6 +22,7 @@ int main(int argc,char** argv){
 		fprintf(stderr, "invalid input\n");
 		return 1;
 	}
+
 	readDict(dictpoint);
 	/*if dict is invalid return*/	
 	if(readval == 1){
@@ -45,13 +46,13 @@ void readDict(FILE* dict_file){
 	fsize = ftell(dict_file); 
 	fseek(dict_file,0L,SEEK_SET);
 	fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
-	if(fsize == 0){
+/*	if(fsize == 0){
 		fprintf(stderr, "empty dictionary\n");
 		fclose(dict_file);
 		readval = 1;
 		return;
 	}
-
+*/
 	while((c = fgetc(dict_file)) != EOF){
 		fileBuffer[i] = c;
 		i++;
@@ -59,6 +60,11 @@ void readDict(FILE* dict_file){
 
 	fclose(dict_file);
 	buildTrie(fileBuffer,fsize);
+	if(gWordCount == 0){
+		fprintf(stderr, "empty dictionary\n");
+		readval = 1;
+		return;
+	}
 
 	free(fileBuffer);
 	readval = 0;
