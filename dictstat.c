@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "trie.h"
 #include "dictstat.h"
 
@@ -22,12 +23,12 @@ int main(int argc,char** argv){
 		return 1;
 	}
 	readDict(dictpoint);
-/*if dict is invalid return*/	
+	/*if dict is invalid return*/	
 	if(readval == 1){
 		return 1;
 	}
 	else{
-	scanData(statpoint);
+		scanData(statpoint);
 	}
 
 	return 0;
@@ -55,10 +56,10 @@ void readDict(FILE* dict_file){
 		fileBuffer[i] = c;
 		i++;
 	}
-	
+
 	fclose(dict_file);
 	buildTrie(fileBuffer,fsize);
-	
+
 	free(fileBuffer);
 	readval = 0;
 	return;
@@ -74,13 +75,13 @@ void scanData(FILE* data_file){
 	int countarrIndex;
 	int i;
 	int x;
-	
-/*declare vars for dumping data file into array*/
+
+	/*declare vars for dumping data file into array*/
 	int fsize = 0;
 	char* fileBuffer;
 	int j;
 	char c;
-	
+
 	i = 0;
 	x = 0;
 	wordarrIndex = 0;
@@ -88,13 +89,13 @@ void scanData(FILE* data_file){
 	wordtemp = root;
 	counttemp = root;
 	wordarr = (char**)calloc(gWordCount,sizeof(char*));
-	
+
 	countarr = (int**)calloc(gWordCount,sizeof(int*));
 	for(i = 0; i < gWordCount; i++){
 		countarr[i] = (int*)calloc(3, sizeof(int));
 	}
-	
-/*initialize vars for dumping data file into array*/
+
+	/*initialize vars for dumping data file into array*/
 	fseek(data_file,0L,SEEK_END);
 	fsize = ftell(data_file);
 	fseek(data_file,0L,SEEK_SET);
@@ -103,7 +104,7 @@ void scanData(FILE* data_file){
 	c = '0';
 
 	trieDFS(wordtemp,buffer,wordarr,&wordarrIndex);
-/*prepare for counting instances*/
+	/*prepare for counting instances*/
 	while((c = fgetc(data_file)) != EOF){
 		fileBuffer[j] = c;
 		j++;
@@ -112,11 +113,11 @@ void scanData(FILE* data_file){
 		fileBuffer[j] = '\0';
 	}
 	fclose(data_file);
-	
-/*start getting counts*/
+
+	/*start getting counts*/
 	counter(fileBuffer,counttemp,countarr,&countarrIndex);
-	
-/*print and done :D*/
+
+	/*print and done :D*/
 	for (x = 0; x < gWordCount; x++) {
 		printf("%s %d %d %d\n", wordarr[x], countarr[x][0],countarr[x][1],countarr[x][2]);
 	}
@@ -146,7 +147,7 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 		if(scout == NULL){
 			continue;
 		}
-		
+
 		else if(scout->next != NULL){
 			if(scout->next[i] != NULL){
 				trieDFS(scout->next[i],buffer,wordarr,index);
@@ -162,13 +163,13 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 }
 
 void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
-/*return on reaching the end of file*/
+	/*return on reaching the end of file*/
 	if(fileBuffer[*index] == '\0'){
 		return;
 	}
-/*only happens on characters not in a-z*/
+	/*only happens on characters not in a-z*/
 	if((int)fileBuffer[*index] > 122 || (int)fileBuffer[*index] < 97){
-	/*for characters from A-Z*/
+		/*for characters from A-Z*/
 		if((int)fileBuffer[*index] >= 65 && (int)fileBuffer[*index] <= 90){
 			fileBuffer[*index] = (char)((int)fileBuffer[*index] + 32);
 		}
@@ -180,80 +181,54 @@ void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 	}
 
 	if(scout->next[((int)fileBuffer[*index]) - (int)'a'] == NULL){
-		(*index)++;
+		while((int)fileBuffer[(*index)] <= 122 && (int)fileBuffer[(*index)] >= 97){
+			(*index)++;
+		}
 		counter(fileBuffer,root,countarr,index);
 		return;
 	}
 	else{
 		scout = scout->next[((int)fileBuffer[*index]) - (int)'a'];
 	}
-	
-	if(fileBuffer[(*index)+1] != EOF){
-	
-		if((int)fileBuffer[(*index)+1] >= 65 && (int)fileBuffer[(*index)+1] <= 90){
-			fileBuffer[(*index)+1] = (char)((int)fileBuffer[(*index)+1] + 32);
-		}
-	/*superword*/
-		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
-			countarr[scout->isWord][2]++;
-			
-			while((int)fileBuffer[(*index)] <= 122 && (int)fileBuffer[(*index)] >= 97){
-				(*index)++;
-			}
-		}
-	/*occurrence*/
-		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
-			countarr[scout->isWord][0]++;
-		}
-	/*prefix*/
-		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
-			prefixBot(scout,countarr);
-		}
-	}
-	
-	else{
-	/*superword*/
-		if(scout->isWord > -1 && (int)fileBuffer[(*index) + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
-			countarr[scout->isWord][2]++;
 
-			while((int)fileBuffer[(*index)] <=122 && (int)fileBuffer[(*index)] >= 97){
-				(*index)++;
-			}
-		}
-	/*occurrence*/
-		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
-			countarr[scout->isWord][0]++;
-		}
-	/*prefix*/
-		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
-			prefixBot(scout,countarr);
-		}	
+
+	if((int)fileBuffer[(*index)+1] >= 65 && (int)fileBuffer[(*index)+1] <= 90){
+		fileBuffer[(*index)+1] += 32;
 	}
-	
+	/*superword*/
+	if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
+		countarr[scout->isWord][2]++;
+	}
+	/*occurrence*/
+	else  {
+		if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
+		countarr[scout->isWord][0]++;
+		}
+		/*prefix*/
+		if(scout->isWord == -1  && !isalpha(fileBuffer[*index + 1])){
+			prefixBot(scout,countarr);
+		}
+}
+
+
 	(*index)++;
 	counter(fileBuffer,scout,countarr,index);
 } 
 
 void prefixBot(trieNode* parent,int** countarr){
 	int i;
-	
+
 	i = 0;
-	
+
+	if (parent == NULL) {
+		return;
+	}
 	if(parent->isWord > -1){
 		countarr[parent->isWord][1]++;
 	}
-	
 	for(i = 0; i < 26; i++){
-		if(parent == NULL){
-			continue;
-		}
-		else if(parent->next != NULL){
-			if(parent->next[i] != NULL){
+		if(parent->next != NULL){
 				prefixBot(parent->next[i],countarr);
-			}
-			else{
-				continue;
-			}
 		}
 	}
 }
