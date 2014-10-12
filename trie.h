@@ -20,7 +20,7 @@ void insert(trieNode* toinsert,trieNode* root);
 void deleteOne(trieNode* todelete,trieNode* root);
 void deleteTrie(trieNode* root);
 trieNode* buildNode(char data,int isWord,int level);
-int buildTrie(char* input);
+int buildTrie(char* input, size_t size);
 void printTrie(trieNode* root);
 int traverseTrie(trieNode* root);
 

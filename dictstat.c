@@ -21,7 +21,6 @@ int main(int argc,char** argv){
 		fprintf(stderr, "invalid input\n");
 		return 1;
 	}
-
 	readDict(dictpoint);
 /*if dict is invalid return*/	
 	if(readval == 1){
@@ -36,12 +35,15 @@ int main(int argc,char** argv){
 
 void readDict(FILE* dict_file){
 
-	int fsize = fseek(dict_file,0,SEEK_END) - fseek(dict_file,0,SEEK_SET);
-	char* fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
-
+	int fsize = 0; 
+	char* fileBuffer; 
 	char c = '0';
 	int i = 0;
 
+	fseek(dict_file,0L,SEEK_END);
+	fsize = ftell(dict_file); 
+	fseek(dict_file,0L,SEEK_SET);
+	fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
 	if(fsize == 0){
 		fprintf(stderr, "empty dictionary\n");
 		fclose(dict_file);
@@ -55,8 +57,9 @@ void readDict(FILE* dict_file){
 	}
 	
 	fclose(dict_file);
-	buildTrie(fileBuffer);
-
+	buildTrie(fileBuffer,fsize);
+	
+	free(fileBuffer);
 	readval = 0;
 	return;
 }
@@ -73,7 +76,7 @@ void scanData(FILE* data_file){
 	int x;
 	
 /*declare vars for dumping data file into array*/
-	int fsize;
+	int fsize = 0;
 	char* fileBuffer;
 	int j;
 	char c;
@@ -81,38 +84,41 @@ void scanData(FILE* data_file){
 	i = 0;
 	x = 0;
 	wordarrIndex = 0;
+	countarrIndex = 0;
 	wordtemp = root;
 	counttemp = root;
-	wordarr = malloc(gWordCount*sizeof(char*));
+	wordarr = (char**)calloc(gWordCount,sizeof(char*));
 	
-	countarr = calloc(gWordCount,sizeof(int*));
+	countarr = (int**)calloc(gWordCount,sizeof(int*));
 	for(i = 0; i < gWordCount; i++){
 		countarr[i] = (int*)calloc(3, sizeof(int));
 	}
 	
 /*initialize vars for dumping data file into array*/
-	fsize = fseek(data_file,0,SEEK_END) - fseek(data_file,0,SEEK_SET);
+	fseek(data_file,0L,SEEK_END);
+	fsize = ftell(data_file);
+	fseek(data_file,0L,SEEK_SET);
 	fileBuffer = (char*)calloc(fsize + 1,sizeof(char));
 	j = 0;
 	c = '0';
 
 	trieDFS(wordtemp,buffer,wordarr,&wordarrIndex);
-
 /*prepare for counting instances*/
 	while((c = fgetc(data_file)) != EOF){
 		fileBuffer[j] = c;
 		j++;
 	}
-	
+	if(c == EOF){
+		fileBuffer[j] = '\0';
+	}
 	fclose(data_file);
 	
 /*start getting counts*/
 	counter(fileBuffer,counttemp,countarr,&countarrIndex);
 	
 /*print and done :D*/
-	
-	for(x = 0; x < gWordCount; x++){
-		printf("%s %d %d %d\n", wordarr[i],countarr[i][0],countarr[i][1],countarr[i][2]);
+	for (x = 0; x < gWordCount; x++) {
+		printf("%s %d %d %d\n", wordarr[x], countarr[x][0],countarr[x][1],countarr[x][2]);
 	}
 }
 
@@ -128,32 +134,38 @@ int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
 	if(scout->isWord > -1){
 		buffer[(scout->level)+1] = '\0';
 
-		wordarr[*index] = (char*)malloc((scout->level+1)*sizeof(char));
+		wordarr[*index] = (char*)calloc((scout->level+2),sizeof(char));
 
 		memcpy(wordarr[*index],buffer,(scout->level)+1);
 
 		scout->isWord = *index;
 
 		(*index)++;
-
-		memset(buffer + (scout->level + 1),0,1);
 	}
-
 	for(i = 0; i < 26; i++){
-		if(scout->next != NULL){
-			trieDFS(scout->next[i],buffer,wordarr,index);
+		if(scout == NULL){
+			continue;
+		}
+		
+		else if(scout->next != NULL){
+			if(scout->next[i] != NULL){
+				trieDFS(scout->next[i],buffer,wordarr,index);
+			}
+			else{
+				continue;
+			}
 		}
 	}
 
-	return 0;		
+
+	return 0;
 }
 
 void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
-/*return on reaching the end of file*/	
-	if(fileBuffer[*index] == EOF){
+/*return on reaching the end of file*/
+	if(fileBuffer[*index] == '\0'){
 		return;
 	}
-
 /*only happens on characters not in a-z*/
 	if((int)fileBuffer[*index] > 122 || (int)fileBuffer[*index] < 97){
 	/*for characters from A-Z*/
@@ -163,47 +175,57 @@ void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 		else{
 			(*index)++;
 			counter(fileBuffer,root,countarr,index);
+			return;
 		}
-	}	
+	}
 
 	if(scout->next[((int)fileBuffer[*index]) - (int)'a'] == NULL){
 		(*index)++;
 		counter(fileBuffer,root,countarr,index);
+		return;
 	}
 	else{
 		scout = scout->next[((int)fileBuffer[*index]) - (int)'a'];
 	}
 	
-	if(fileBuffer[*index+1] != EOF){
+	if(fileBuffer[(*index)+1] != EOF){
 	
-		if((int)fileBuffer[*index+1] >= 65 && (int)fileBuffer[*index+1] <= 90){
-			fileBuffer[*index+1] = (char)((int)fileBuffer[*index+1] + 32);
+		if((int)fileBuffer[(*index)+1] >= 65 && (int)fileBuffer[(*index)+1] <= 90){
+			fileBuffer[(*index)+1] = (char)((int)fileBuffer[(*index)+1] + 32);
 		}
 	/*superword*/
 		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
 			countarr[scout->isWord][2]++;
+			
+			while((int)fileBuffer[(*index)] <= 122 && (int)fileBuffer[(*index)] >= 97){
+				(*index)++;
+			}
 		}
 	/*occurrence*/
-		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
 			countarr[scout->isWord][0]++;
 		}
 	/*prefix*/
-		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
 			prefixBot(scout,countarr);
 		}
 	}
 	
 	else{
 	/*superword*/
-		if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
+		if(scout->isWord > -1 && (int)fileBuffer[(*index) + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
 			countarr[scout->isWord][2]++;
+
+			while((int)fileBuffer[(*index)] <=122 && (int)fileBuffer[(*index)] >= 97){
+				(*index)++;
+			}
 		}
 	/*occurrence*/
-		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		else if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
 			countarr[scout->isWord][0]++;
 		}
 	/*prefix*/
-		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] >= 122 || (int)fileBuffer[*index + 1] <= 97)){
+		else if(scout->isWord == -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
 			prefixBot(scout,countarr);
 		}	
 	}
@@ -222,8 +244,16 @@ void prefixBot(trieNode* parent,int** countarr){
 	}
 	
 	for(i = 0; i < 26; i++){
-		if(parent->next != NULL){
-			prefixBot(parent->next[i],countarr);
+		if(parent == NULL){
+			continue;
+		}
+		else if(parent->next != NULL){
+			if(parent->next[i] != NULL){
+				prefixBot(parent->next[i],countarr);
+			}
+			else{
+				continue;
+			}
 		}
 	}
 }

@@ -10,11 +10,11 @@ dictstat: dictstat.o libtrie.a
 libtrie.a: trie.o
 	$(AR) -r libtrie.a trie.o
 
-trie.o:
-	$(COMPILER) $(CCFLAGS) -c trie.c trie.h
+trie.o: trie.c
+	$(COMPILER) $(CCFLAGS) -c trie.c
 
-dictstat.o:
-	$(COMPILER) $(CCFLAGS) -c dictstat.c dictstat.h
+dictstat.o: dictstat.c
+	$(COMPILER) $(CCFLAGS) -c dictstat.c
 
 clean:
-	rm *.o *.a *.gch dictstat
+	rm -f *.o *.a *.gch dictstat
