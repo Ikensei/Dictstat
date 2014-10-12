@@ -199,14 +199,20 @@ void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 	if(scout->isWord > -1 && (int)fileBuffer[*index + 1] <= 122 && (int)fileBuffer[*index + 1] >= 97){
 		countarr[scout->isWord][2]++;
 	}
-	/*occurrence*/
 	else  {
-		if(scout->isWord > -1 && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97)){
-		countarr[scout->isWord][0]++;
+		/*occurrence*/
+		if((scout->isWord > -1) && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97) && (scout->next == NULL)){
+			countarr[scout->isWord][0]++;
 		}
 		/*prefix*/
-		if(scout->isWord == -1  && !isalpha(fileBuffer[*index + 1])){
-			prefixBot(scout,countarr);
+		else if((scout->isWord > -1) && ((int)fileBuffer[*index + 1] > 122 || (int)fileBuffer[*index + 1] < 97) && (scout->next != NULL)){
+			countarr[scout->isWord][0]++;
+			prefixBot(scout,countarr,scout);
+		}
+
+		/*prefix*/
+		else if(scout->isWord == -1  && !isalpha(fileBuffer[*index + 1])){
+			prefixBot(scout,countarr,scout);
 		}
 }
 
@@ -215,7 +221,7 @@ void counter(char* fileBuffer,trieNode* scout,int** countarr,int* index){
 	counter(fileBuffer,scout,countarr,index);
 } 
 
-void prefixBot(trieNode* parent,int** countarr){
+void prefixBot(trieNode* parent,int** countarr,trieNode* check){
 	int i;
 
 	i = 0;
@@ -223,12 +229,12 @@ void prefixBot(trieNode* parent,int** countarr){
 	if (parent == NULL) {
 		return;
 	}
-	if(parent->isWord > -1){
+	if((parent->isWord > -1) && (parent != check)){
 		countarr[parent->isWord][1]++;
 	}
 	for(i = 0; i < 26; i++){
 		if(parent->next != NULL){
-				prefixBot(parent->next[i],countarr);
+				prefixBot(parent->next[i],countarr,check);
 		}
 	}
 }

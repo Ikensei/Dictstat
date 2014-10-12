@@ -9,7 +9,7 @@ int readval;
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index);
 void counter(char* fileBuffer, trieNode* scout,int** countarr, int* index);
-void prefixBot(trieNode* parent,int** countarr);
+void prefixBot(trieNode* parent,int** countarr,trieNode* check);
 
 void readDict(FILE* dict_file);
 void scanData(FILE* data_file);
