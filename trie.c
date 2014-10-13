@@ -25,19 +25,37 @@ int add(char toadd,trieNode* parent) {
 	return index;
 }
 
-void insert(trieNode* toinsert,trieNode* root) {
+void insert(trieNode* toinsert,trieNode* parent) {
 
 }
 
 /*To delete the whole tree:traverse to the bottom of the tree and delete each node when recursion bubbles back up
   To delete one:reassign pointers and then free memory
   To delete tree:repeatedly call delete one */
-void deleteOne(trieNode* todelete,trieNode* root) { 
-free(todelete);
+void deleteOne(trieNode* todelete) { 
+	free(todelete);
 }
 
-void deleteTrie(trieNode* root) {
+void deleteTrie(trieNode* parent) {
+	int i;
 
+	i = 0;
+
+	for(i = 0; i < 26; i++){
+		if(parent == NULL){
+			continue;
+		}
+
+		if(parent->next != NULL){
+			if(parent->next[i] != NULL){
+				deleteTrie(parent->next[i]);
+				deleteOne(parent);
+			}
+		}
+		else{
+			deleteOne(parent);
+		}
+	}
 }
 
 trieNode* buildNode(char data,int isWord,int level) {
@@ -77,10 +95,10 @@ int buildTrie(char* input, size_t size) {
 	return 0;
 }
 
-void printTrie(trieNode* root) {
+void printTrie(trieNode* parent) {
 
 }
 
-int traverseTrie(trieNode* root) {
+int traverseTrie(trieNode* parent) {
 	return 0;
 }

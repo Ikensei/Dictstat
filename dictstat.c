@@ -127,6 +127,16 @@ void scanData(FILE* data_file){
 	for (x = 0; x < gWordCount; x++) {
 		printf("%s %d %d %d\n", wordarr[x], countarr[x][0],countarr[x][1],countarr[x][2]);
 	}
+	
+	free(fileBuffer);
+	free(wordarr);
+
+	for(j = 0; j < gWordCount; j++){
+		free(countarr[j]);
+	}
+	free(countarr);
+	
+	/*deleteTrie(root);*/
 }
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
