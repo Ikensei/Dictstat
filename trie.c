@@ -41,7 +41,7 @@ void deleteTrie(trieNode* parent) {
 
 	i = 0;
 
-	for(i = 0; i < 26; i++){
+/*	for(i = 0; i < 26; i++){
 		if(parent == NULL){
 			continue;
 		}
@@ -55,7 +55,20 @@ void deleteTrie(trieNode* parent) {
 		else{
 			deleteOne(parent);
 		}
+	}*/
+
+	if(parent == NULL){
+		return;
 	}
+
+	if(parent->next != NULL){
+		for(i = 0; i < 26; i++){
+			if(parent->next[i] != NULL){
+				deleteTrie(parent->next[i]);
+			}
+		}
+	}
+	deleteOne(parent);
 }
 
 trieNode* buildNode(char data,int isWord,int level) {

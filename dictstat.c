@@ -129,6 +129,11 @@ void scanData(FILE* data_file){
 	}
 	
 	free(fileBuffer);
+
+	for(j = 0; j < gWordCount; j++){
+		free(wordarr[j]);
+	}
+
 	free(wordarr);
 
 	for(j = 0; j < gWordCount; j++){
@@ -136,7 +141,7 @@ void scanData(FILE* data_file){
 	}
 	free(countarr);
 	
-	/*deleteTrie(root);*/
+	deleteTrie(root);
 }
 
 int trieDFS(trieNode* scout,char* buffer,char** wordarr,int* index){
