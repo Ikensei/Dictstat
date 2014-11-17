@@ -1,0 +1,4 @@
+1. Small correctness check fails. Found during extremely specific runtime test. Investigate reason and debug
+
+2. Segmentation fault on extremely large testcases (dictionary size input). Valgrind shows a stack overflow.
+Should probably rework ordering of recursive calls
